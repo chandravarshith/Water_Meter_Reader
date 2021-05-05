@@ -8,6 +8,15 @@
         android:icon="@drawable/ic_action_addimage"/>
 
     <item
-        android:id="@+id/settings"
-        android:title="Settings"/>
+        android:id="@+id/saveItem"
+        android:title="Save"/>
+
+    <item
+        android:id="@+id/deleteItem"
+        android:title="Delete"/>
+
+    <item
+        android:id="@+id/viewItem"
+        android:title="View"/>
+
 </menu>

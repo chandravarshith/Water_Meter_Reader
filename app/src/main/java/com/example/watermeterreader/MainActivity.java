@@ -16,6 +16,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
@@ -24,6 +25,8 @@ import android.provider.MediaStore;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -34,18 +37,24 @@ import com.google.android.gms.vision.text.TextRecognizer;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import static java.lang.Integer.parseInt;
+
 public class MainActivity extends AppCompatActivity {
 
-    EditText mReading;
-    ImageView mImage;
+    public EditText mReading;
+    public ImageView mImage;
+    public EditText meterId;
+
+    DatabaseManager db;
+
 
     private static final int camera_request_code = 200;
     private static final int storage_request_code = 400;
     private static final int image_from_gallery_code = 1000;
     private static final int image_from_camera_code = 1001;
 
-    String cameraPermission[];
-    String storagePermission[];
+    String[] cameraPermission;
+    String[] storagePermission;
 
     Uri imageUri;
 
@@ -59,12 +68,17 @@ public class MainActivity extends AppCompatActivity {
 
         mReading = findViewById(R.id.reading);
         mImage = findViewById(R.id.image);
+        meterId = findViewById(R.id.meterId);
 
         //camera permission
         cameraPermission = new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
         //storage permission
         storagePermission = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
+        //database
+        db = new DatabaseManager(this);
+
     }
 
     //actionbar menu
@@ -79,12 +93,53 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
+
         if(id == R.id.addImage){
             displayImageImportDialog();
         }
-        if(id == R.id.settings){
-            Toast.makeText(this, "settings",Toast.LENGTH_SHORT).show();
+
+        if(id == R.id.saveItem){
+            int meterIdValue = parseInt(meterId.getText().toString());
+            int meterReadingValue = parseInt(mReading.getText().toString());
+
+            Boolean checkSaveData = db.saveMeterData(meterIdValue,meterReadingValue);
+            if(checkSaveData){
+                Toast.makeText(MainActivity.this,"Details saved",Toast.LENGTH_SHORT).show();
+            }
+            else{
+                Toast.makeText(MainActivity.this,"Sorry, Please try again!",Toast.LENGTH_SHORT).show();
+            }
         }
+
+        if(id == R.id.deleteItem){
+            int meterIdValue = parseInt(meterId.getText().toString());
+            Boolean checkDeleteData = db.deleteMeterData(meterIdValue);
+            if(checkDeleteData)
+                Toast.makeText(MainActivity.this, "Details Deleted", Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(MainActivity.this, "Sorry, Please try again!", Toast.LENGTH_SHORT).show();
+        }
+
+        if(id == R.id.viewItem) {
+            Cursor res = db.viewData();
+            if (res.getCount() == 0) {
+                Toast.makeText(MainActivity.this, "No details", Toast.LENGTH_SHORT).show();
+            }
+            else{
+                StringBuffer strBuffer = new StringBuffer();
+                while (res.moveToNext()) {
+                    strBuffer.append("Meter ID :" + res.getString(0) + "\n");
+                    strBuffer.append("Meter Reading :" + res.getString(1) + "\n\n");
+                }
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setCancelable(true);
+                builder.setTitle("Meter Entries");
+                builder.setMessage(strBuffer.toString());
+                builder.show();
+            }
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
