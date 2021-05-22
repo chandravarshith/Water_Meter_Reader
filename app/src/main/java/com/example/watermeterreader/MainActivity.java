@@ -9,10 +9,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
-import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -25,17 +22,21 @@ import android.provider.MediaStore;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
+
 import android.view.View;
-import android.widget.Button;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
+
 
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
+
+
 
 import static java.lang.Integer.parseInt;
 
@@ -46,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
     public EditText meterId;
 
     DatabaseManager db;
-
 
     private static final int camera_request_code = 200;
     private static final int storage_request_code = 400;
@@ -99,15 +99,18 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if(id == R.id.saveItem){
-            int meterIdValue = parseInt(meterId.getText().toString());
-            int meterReadingValue = parseInt(mReading.getText().toString());
+            try{
+                int meterIdValue = parseInt(meterId.getText().toString());
+                Float meterReadingValue = Float.parseFloat(mReading.getText().toString());
 
-            Boolean checkSaveData = db.saveMeterData(meterIdValue,meterReadingValue);
-            if(checkSaveData){
-                Toast.makeText(MainActivity.this,"Details saved",Toast.LENGTH_SHORT).show();
-            }
-            else{
-                Toast.makeText(MainActivity.this,"Sorry, Please try again!",Toast.LENGTH_SHORT).show();
+                Boolean checkSaveData = db.saveMeterData(meterIdValue, meterReadingValue);
+                if (checkSaveData) {
+                    Toast.makeText(MainActivity.this, "Details saved", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "Sorry, Please try again!", Toast.LENGTH_SHORT).show();
+                }
+            }catch (Exception e){
+                Toast.makeText(MainActivity.this, "Please, Fill all the details.", Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -242,6 +245,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -274,14 +278,30 @@ public class MainActivity extends AppCompatActivity {
                 for (int i = 0; i < items.size(); i++) {
                     TextBlock myItem = items.valueAt(i);
                     strBld.append(myItem.getValue());
-                    strBld.append("\n");
                 }
                 mReading.setText(strBld.toString());
             }
-
-//            String temp = mTessOCR.getOCRResult(bitmap);
-//            mReading.setText(temp);
         }
+    }
+
+    public void onBackPressed() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setCancelable(false);
+        builder.setMessage("Are you sure?");
+        builder.setPositiveButton("Exit", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                finishAffinity();
+            }
+        });
+        builder.setNegativeButton("Cancel",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        AlertDialog alert=builder.create();
+        alert.show();
     }
 
 }

@@ -16,16 +16,17 @@ public class DatabaseManager extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("create Table MeterDetails(Meter_ID INTEGER primary key, Meter_Reading INTEGER)");
+        db.execSQL("create Table MeterDetails(Meter_ID INTEGER primary key, Meter_Reading REAL)");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("drop Table if exists MeterDetails");
+        onCreate(db);
     }
 
-    public Boolean saveMeterData(int id, int reading){
-        SQLiteDatabase db = this.getReadableDatabase();
+    public Boolean saveMeterData(int id, Float reading){
+        SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
 
         contentValues.put("Meter_ID",id);
@@ -33,8 +34,8 @@ public class DatabaseManager extends SQLiteOpenHelper {
 
         long res = db.insert("MeterDetails",null,contentValues);
 
-        if(res == -1) return true;
-        else return false;
+        if(res == -1) return false;
+        else return true;
     }
 
     public Boolean deleteMeterData (int id) {
