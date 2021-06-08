@@ -2,6 +2,7 @@ package com.example.watermeterreader;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +18,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.SparseArray;
@@ -90,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //handle actionbar clicks
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
@@ -131,8 +134,9 @@ public class MainActivity extends AppCompatActivity {
             else{
                 StringBuffer strBuffer = new StringBuffer();
                 while (res.moveToNext()) {
-                    strBuffer.append("Meter ID :" + res.getString(0) + "\n");
-                    strBuffer.append("Meter Reading :" + res.getString(1) + "\n\n");
+                    strBuffer.append("Meter ID : " + res.getString(0) + "\n");
+                    strBuffer.append("Meter Reading : " + res.getString(1) + "\n");
+                    strBuffer.append("Date & time : " + res.getString(2) + "\n\n");
                 }
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
